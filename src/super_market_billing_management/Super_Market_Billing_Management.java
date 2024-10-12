@@ -4,19 +4,39 @@
  */
 package super_market_billing_management;
 import Login.LoginForm;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import javax.swing.JOptionPane;
 /**
  *
  * @author LENOVO
  */
 public class Super_Market_Billing_Management {
-
+    
+      // Connect to MySQL
+     public static Connection getConnection() {
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/supermarket_db", "root", "password");
+        } catch (Exception ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+        return conn;
+    }
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
-          LoginForm loginForm = new LoginForm();
-    loginForm.setVisible(true);
+          Connection conn = getConnection(); 
+          LoginForm loginForm = new LoginForm(conn);
+          loginForm.setVisible(true);
+        
+          System.out.println(conn+"con");
+      
+
     }
     
 }
