@@ -4,6 +4,7 @@
  */
 package Login;
 
+import Dashboard.DashPage;
 import java.awt.Color;
 import java.sql.*;
 import javax.swing.JOptionPane;
@@ -135,8 +136,8 @@ public class LoginForm extends javax.swing.JFrame {
 
     private void LoginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginBtnActionPerformed
         // TODO add your handling code here:
-        
-        String user=UserName.getText();
+        DashPage d=new DashPage();
+              String user=UserName.getText();
         String pwd= PassWord.getText();
         String sql = "select * from user where username = ? and password = ?";
         try
@@ -149,6 +150,9 @@ public class LoginForm extends javax.swing.JFrame {
             {
                 System.out.println("login success");
                 JOptionPane.showMessageDialog(null, "Username and Password correct");
+                d.setVisible(true);
+                this.setVisible(false);
+                
             }
             else
             {
