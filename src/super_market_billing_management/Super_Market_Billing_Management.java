@@ -6,9 +6,6 @@ package super_market_billing_management;
 import Login.LoginForm;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import javax.swing.JOptionPane;
 /**
  *
  * @author LENOVO
@@ -20,6 +17,7 @@ public class Super_Market_Billing_Management {
         Connection conn = null;
         try {
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/supermarket_db", "root", "password");
+            System.out.println("First db connection success " );
         } catch (Exception ex) {
             System.out.println("Error: " + ex.getMessage());
         }

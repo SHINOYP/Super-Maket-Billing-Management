@@ -7,6 +7,7 @@ package Login;
 import Dashboard.DashPage;
 import java.awt.Color;
 import java.sql.*;
+import java.util.ArrayList;
 import javax.swing.JOptionPane;
 /**
  *
@@ -136,6 +137,7 @@ public class LoginForm extends javax.swing.JFrame {
 
     private void LoginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginBtnActionPerformed
         // TODO add your handling code here:
+      
         DashPage d=new DashPage();
               String user=UserName.getText();
         String pwd= PassWord.getText();
@@ -152,6 +154,7 @@ public class LoginForm extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Username and Password correct");
                 d.setVisible(true);
                 this.setVisible(false);
+                connection.close();
                 
             }
             else

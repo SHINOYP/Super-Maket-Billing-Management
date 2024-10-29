@@ -4,6 +4,15 @@
  */
 package Dashboard;
 
+
+import java.awt.Font;
+import java.awt.event.ItemEvent;
+import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import javax.swing.*;
 /**
  *
  * @author LENOVO
@@ -13,8 +22,97 @@ public class DashPage extends javax.swing.JFrame {
     /**
      * Creates new form Dashboard
      */
+    public static Connection conn = null;
+    public static ResultSet rs = null;
+    public static PreparedStatement pst = null;
+    
     public DashPage() {
         initComponents();
+        getContentPane().setBackground(new java.awt.Color(82, 169, 169));   
+        getConnection();
+    // Set font size for table header
+        jTable1.getTableHeader().setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        Label_Heading.setForeground(java.awt.Color.BLACK);
+
+        //Item_name.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "soap", "Item 2", "Item 3", "Item 4" }));
+    }
+    
+    
+         
+    static void getItems() {
+     String sql = "select * from products";
+          ArrayList<String> itemNameList = new ArrayList<>();
+      
+    try {
+        pst = conn.prepareStatement(sql);
+        rs = pst.executeQuery();
+        System.out.print(rs +"result");
+             while (rs.next()) {
+                itemNameList.add(rs.getString("name")); // Assuming the column name is item_name
+               
+             }
+            Item_name.setModel(new javax.swing.DefaultComboBoxModel<>(itemNameList.toArray(new String[0])));
+    
+
+    } catch (SQLException e) {
+        
+        System.out.println("Error: " + e.getMessage());
+    } finally {
+        // It's a good idea to close the resources after use
+        try {
+            if (rs != null) rs.close();
+            
+        } catch (SQLException e) {
+            System.out.println("Error closing resources: " + e.getMessage());
+        }
+    }
+ 
+    }
+    
+      public void updateQuantityComboBox() {
+        String selectedProduct = (String) Item_name.getSelectedItem();
+        if (selectedProduct != null) {
+            String sql = "SELECT stockQty FROM products WHERE name = ?";
+            try {
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, selectedProduct);  // Pass selected product to the SQL query
+                rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    int maxQty = rs.getInt("stockQty");  // Fetch max quantity (stock) from the database
+
+                    // Create an array with numbers from 1 to maxQty
+                    String[] qtyOptions = new String[maxQty];
+                    for (int i = 0; i < maxQty; i++) {
+                        qtyOptions[i] = String.valueOf(i + 1);  // Fill array with options from 1 to maxQty
+                    }
+                    // Update the Item_count combo box with available quantity options
+                    Item_count.setModel(new DefaultComboBoxModel<>(qtyOptions));
+                }
+            } catch (SQLException e) {
+                System.out.println("Error fetching quantity: " + e.getMessage());
+            } finally {
+                try {
+                    if (rs != null) rs.close();
+                } catch (SQLException e) {
+                    System.out.println("Error closing ResultSet: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+     
+    // Connect to MySQL
+     public static Connection getConnection() {
+     System.out.println("sql in" );
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/supermarket_db", "root", "password");
+            System.out.println("dashboard Db connection successfull" );
+            getItems();
+        } catch (Exception ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }finally{   getItems();}
+        return conn;
     }
 
     /**
@@ -26,27 +124,20 @@ public class DashPage extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jComboBox1 = new javax.swing.JComboBox<>();
         jButton1 = new javax.swing.JButton();
-        jComboBox2 = new javax.swing.JComboBox<>();
-        jLabel1 = new javax.swing.JLabel();
+        Item_count = new javax.swing.JComboBox<>();
+        Label_Heading = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
+        Item_name = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(204, 204, 255));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setPreferredSize(new java.awt.Dimension(1920, 1080));
-
-        jComboBox1.setBackground(new java.awt.Color(0, 255, 153));
-        jComboBox1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
-            }
-        });
 
         jButton1.setBackground(new java.awt.Color(102, 255, 51));
         jButton1.setText("Add");
@@ -56,19 +147,20 @@ public class DashPage extends javax.swing.JFrame {
             }
         });
 
-        jComboBox2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox2.addActionListener(new java.awt.event.ActionListener() {
+        Item_count.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        Item_count.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select product" }));
+        Item_count.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox2ActionPerformed(evt);
+                Item_countActionPerformed(evt);
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jLabel1.setText("SUPERMARKET BILLING SOFTWARE");
+        Label_Heading.setBackground(new java.awt.Color(255, 255, 255));
+        Label_Heading.setFont(new java.awt.Font("Segoe UI Variable", 1, 36)); // NOI18N
+        Label_Heading.setText("SUPERMARKET BILLING SOFTWARE");
 
         jTable1.setBackground(new java.awt.Color(204, 204, 204));
-        jTable1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jTable1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null},
@@ -80,6 +172,7 @@ public class DashPage extends javax.swing.JFrame {
                 "Product Name", "Quantity", "Price"
             }
         ));
+        jTable1.setFocusCycleRoot(true);
         jScrollPane1.setViewportView(jTable1);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -96,6 +189,14 @@ public class DashPage extends javax.swing.JFrame {
             }
         });
 
+        Item_name.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        Item_name.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        Item_name.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Item_nameActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -106,24 +207,26 @@ public class DashPage extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel1)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 444, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(29, 29, 29)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(Label_Heading)
+                                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(98, 98, 98))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(Item_name, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 314, Short.MAX_VALUE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(10, 10, 10)
-                                        .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                            .addComponent(jScrollPane1)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 699, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 280, Short.MAX_VALUE))
+                                    .addComponent(Item_count, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 883, Short.MAX_VALUE)
                                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(663, 663, 663))))
         );
@@ -131,34 +234,30 @@ public class DashPage extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addComponent(Label_Heading)
                 .addGap(26, 26, 26)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Item_count, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Item_name, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(29, 29, 29)
+                .addGap(606, 606, 606)
                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+    private void Item_countActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Item_countActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
-
-    private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox2ActionPerformed
+    }//GEN-LAST:event_Item_countActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
@@ -167,6 +266,14 @@ public class DashPage extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
+
+
+    private void Item_nameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Item_nameActionPerformed
+
+          String selectedItem = (String) Item_name.getSelectedItem();
+          System.out.println("Selected Item: " + selectedItem);
+          updateQuantityComboBox();
+    }//GEN-LAST:event_Item_nameActionPerformed
 
     /**
      * @param args the command line arguments
@@ -195,7 +302,8 @@ public class DashPage extends javax.swing.JFrame {
         }
         //</editor-fold>
         //</editor-fold>
-        
+            Connection conn = getConnection(); 
+         
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -205,11 +313,11 @@ public class DashPage extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    public static javax.swing.JComboBox<String> Item_count;
+    public static javax.swing.JComboBox<String> Item_name;
+    private javax.swing.JLabel Label_Heading;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
